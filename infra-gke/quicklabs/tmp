@@ -1,0 +1,43 @@
+    5  gcloud compute instance-templates create it-nginx --metadata-from-file startup-script=startup.sh
+    6  gcloud compute target-pools create tp-nginx
+    7  gcloud compute instance-groups managed create nginx-group --base-instance-name nginx --size 2 --template it-nginx --target-pool tp-nginx
+    8  gcloud compute instances list
+    9  gcloud compute firewall-rules create allow-http --allow tcp:80
+   10  gcloud compute forwarding-rules create fr-nginx --region us-east1 --ports=80 --target-pool tp-nginx
+   11  gcloud forwarding-rules list
+   12  gcloud compute forwarding-rules list
+   13  gcloud compute http-health-checks create hc-nginx
+   14  gcloud compute instance-groups managed set-named-ports nginx-group --named-ports http:80
+   15  gcloud compute backend-services create be-nginx --protocol HTTP --http-health-checks hc-nginx --global
+   16  gcloud compute backend-services add-backend be-nginx --instance-group nginx-group --instance-group-zone us-east1-b
+   17  gcloud compute backend-services add-backend be-nginx --instance-group nginx-group --instance-group-zone us-east1-b --global
+   18  gcloud compute backend-services add-backend be-nginx --instance-group ig-nginx --instance-group-zone us-east1-b --global
+   19  gcloud compute backend-services add-backend be-nginx --instance-group nginx-group --instance-group-zone us-east1-b --global
+   20  gcloud compute backend-services add-backend be-nginx --instance-group managed nginx-group --instance-group-zone us-east1-b --global
+   21  gcloud compute backend-services add-backend be-nginx --instance-group nginx-group --global
+   22  gcloud compute url-maps create urlmap-nginx --default-service be-nginx
+   23  gcloud compute target-http-proxies create http-lb-proxy --url-map urlmap-nginx
+   24  gcloud compute forwarding-rules create http-fw-rule --global --target-http-proxy http-lb-proxy \
+
+
+gcloud container clusters create cluster
+gcloud container clusters create cluster --region=us-east1 --zone=us-east1-b
+
+cat << EOF > startup.sh
+#! /bin/bash
+apt-get update
+apt-get install -y nginx
+service nginx start
+sed -i -- 's/nginx/Google Cloud Platform - '"\$HOSTNAME"'/' /var/www/html/index.nginx-debian.html
+EOF
+
+gcloud compute instance-templates create it-nginx --metadata-from-file startup-script=startup.sh
+
+gcloud container get-credentials cluster-1
+gcloud get-credentials cluster-1
+gcloud container clusters get-credentials cluster-1
+gcloud container clusters get-credentials cluster-1 --zone us-east1-b --project qwiklabs-gcp-01-e22ee491fdea
+kubectl get nodes
+kubectl create deployment hello-app --image=gcr.io/google-samples/hello-app:2.0
+kubectl expose deployment hello-app --type=LoadBalancer --port 8080
+gcloud compute health-checks list

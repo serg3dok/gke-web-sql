@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpd-frontend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: frontend-httpd
+  template:
+    metadata:
+      labels:
+        app: frontend-httpd
+    spec:
+      containers:
+      - name: frontend-httpd
+        image: httpd:2.4-alpine
+        resources:
+          requests:
+            memory: "32Mi"
+            cpu: "100m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 8080
